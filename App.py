@@ -362,8 +362,8 @@ class MainApplication(tk.Tk):
             self.bind('<Control-o>', lambda event: self.img_UI.open_image())
             self.bind('<Control-s>', lambda event: self.img_UI.save_image())
 
-    def __debugging(self):
-        self.img_UI.set_image(filepath='/Users/damiantworek/Desktop/pic.png')
+    # def __debugging(self):
+    #     self.img_UI.set_image(filepath='/Users/damiantworek/Desktop/pic.png')
 
 
 if __name__ == '__main__':
