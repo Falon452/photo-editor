@@ -236,42 +236,40 @@ class ImgUI:
             self.crop_start_x, self.crop_start_y, self.crop_end_x, self.crop_end_y, width=1)
 
     def end_crop(self, event):
-        ratio = 1
 
         if self.crop_start_x <= self.crop_end_x and self.crop_start_y <= self.crop_end_y:
-            start_x = int(self.crop_start_x * ratio)
-            start_y = int(self.crop_start_y * ratio)
-            end_x = int(self.crop_end_x * ratio)
-            end_y = int(self.crop_end_y * ratio)
+            start_x = self.crop_start_x
+            start_y = self.crop_start_y
+            end_x = self.crop_end_x
+            end_y = self.crop_end_y
         elif self.crop_start_x > self.crop_end_x and self.crop_start_y <= self.crop_end_y:
-            start_x = int(self.crop_end_x * ratio)
-            start_y = int(self.crop_start_y * ratio)
-            end_x = int(self.crop_start_x * ratio)
-            end_y = int(self.crop_end_y * ratio)
+            start_x = self.crop_end_x
+            start_y = self.crop_start_y
+            end_x = self.crop_start_x
+            end_y = self.crop_end_y
         elif self.crop_start_x <= self.crop_end_x and self.crop_start_y > self.crop_end_y:
-            start_x = int(self.crop_start_x * ratio)
-            start_y = int(self.crop_end_y * ratio)
-            end_x = int(self.crop_end_x * ratio)
-            end_y = int(self.crop_start_y * ratio)
+            start_x = self.crop_start_x
+            start_y = self.crop_end_y
+            end_x = self.crop_end_x
+            end_y = self.crop_start_y
         else:
-            start_x = int(self.crop_end_x * ratio)
-            start_y = int(self.crop_end_y * ratio)
-            end_x = int(self.crop_start_x * ratio)
-            end_y = int(self.crop_start_y * ratio)
+            start_x = self.crop_end_x
+            start_y = self.crop_end_y
+            end_x = self.crop_start_x
+            end_y = self.crop_start_y
 
-        original_width = self.img.size[0]
-        original_height = self.img.size[1]
+        start_x, start_y, end_x, end_y = list(map(int, (start_x, start_y, end_x, end_y)))
+
+        original_width, original_height = self.img.size
 
         show_width, show_height = self.parent.image_frame.show_resolution
 
         ratio_x = original_width / show_width
-
         start_x = int(start_x * ratio_x)
         end_x = int(end_x * ratio_x)
 
         ratio_y = original_height / show_height
         start_y = int(start_y * ratio_y)
-
         end_y = int(end_y * ratio_y)
 
         res = np.array(self.img)[start_y: end_y, start_x: end_x]
