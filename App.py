@@ -10,6 +10,7 @@ import cv2
 import sys
 import numpy as np
 
+
 # pip install opencv-contrib-python
 
 class MenuBar(ttk.Frame):
@@ -58,23 +59,62 @@ class ImageEffectsBar(ttk.Frame):
 
     def __create_widgets(self):
         self.button = ttk.Button(self, text="Paint Effect", command=self.parent.img_UI.paint_effect)
-        self.button.pack(side="left")
+        self.button.grid(row=0, column=0)
 
         self.button = ttk.Button(self, text="Invert Effect", command=self.parent.img_UI.invert_effect)
-        self.button.pack(side="left")
+        self.button.grid(row=0, column=1)
 
         self.button = ttk.Button(self, text="Solarize Effect", command=self.parent.img_UI.solarize_effect)
-        self.button.pack(side="left")
+        self.button.grid(row=0, column=2)
 
         self.button = ttk.Button(self, text='Filter Color', command=self.parent.img_UI.change_color)
-        self.button.pack(side="left", expand=True)
+        self.button.grid(row=0, column=3)
 
         self.slider_label = ttk.Label(self, text='Brightness: ')
-        self.slider_label.pack(side="left", expand=True)
+        self.slider_label.grid(row=0, column=4)
 
         self.slider = ttk.Scale(self, from_=0, to=2, orient=HORIZONTAL, value=1)
         self.slider.bind("<ButtonRelease-1>", self.parent.img_UI.brightness_effect)
-        self.slider.pack(side="left", expand=True)
+        self.slider.grid(row=0, column=5)
+
+        self.button = ttk.Button(self, text="Rotate Right", command=self.parent.img_UI.rotate_right)
+        self.button.grid(row=1, column=0)
+
+        self.button = ttk.Button(self, text="Rotate Left", command=self.parent.img_UI.rotate_left)
+        self.button.grid(row=1, column=1)
+
+        self.button = ttk.Button(self, text="Flip Horizontally", command=self.parent.img_UI.flip_horizontally)
+        self.button.grid(row=1, column=2)
+
+        self.button = ttk.Button(self, text="Flip Vertically", command=self.parent.img_UI.flip_vertically)
+        self.button.grid(row=1, column=3)
+
+        self.button = ttk.Button(self, text="Resolution", command=self.open_window)
+        self.button.grid(row=1, column=4)
+
+        self.button = ttk.Button(self, text="Crop", command=self.parent.image_frame.start_cropping)
+        self.button.grid(row=1, column=5)
+
+    def open_window(self):
+        new_window = tk.Toplevel(self.parent)
+        new_window.geometry("300x150")
+        new_window.resizable(False, False)
+
+        self.width_label = ttk.Label(new_window, text="Width:")
+        self.width_label.pack(fill='x')
+
+        self.width_entry = ttk.Entry(new_window)
+        self.width_entry.pack(fill='x')
+        self.width_entry.focus()
+
+        self.height_label = ttk.Label(new_window, text="Height:")
+        self.height_label.pack(fill='x')
+
+        self.height_entry = ttk.Entry(new_window)
+        self.height_entry.pack(fill='x')
+
+        self.button = ttk.Button(new_window, text="save", command=self.parent.img_UI.change_resolution)
+        self.button.pack(fill='x')
 
 
 class ImgUI:
@@ -119,9 +159,6 @@ class ImgUI:
         res = Image.fromarray(res)
         self.change_img(res)
 
-        # res = self.img.filter(ModeFilter(size=7))
-        # self.change_img(res)
-
     def invert_effect(self):
         res = ImageOps.invert(self.img)
         self.change_img(res)
@@ -143,16 +180,105 @@ class ImgUI:
     def undo(self):
         if self.__stack:
             self.__stack_ix = max(0, self.__stack_ix - 1)
-            self.parent.image_frame.change_img(self.__stack[self.__stack_ix], add_to_stack=False)
+            self.parent.image_frame.show_img(self.__stack[self.__stack_ix])
+            self.img = self.__stack[self.__stack_ix]
 
     def redo(self):
         if self.__stack:
             self.__stack_ix = min(len(self.__stack) - 1, self.__stack_ix + 1)
-            self.parent.image_frame.change_img(self.__stack[self.__stack_ix], add_to_stack=False)
+            self.parent.image_frame.show_img(self.__stack[self.__stack_ix])
+            self.img = self.__stack[self.__stack_ix]
 
     def change_color(self):
         colors = askcolor(title="Color Chooser")
         self.color_effect(colors[0])
+
+    def rotate_right(self):
+        res = cv2.rotate(np.array(self.img), cv2.ROTATE_90_CLOCKWISE)
+        res = Image.fromarray(res)
+        self.change_img(res)
+
+    def rotate_left(self):
+        res = cv2.rotate(np.array(self.img), cv2.ROTATE_90_COUNTERCLOCKWISE)
+        res = Image.fromarray(res)
+        self.change_img(res)
+
+    def flip_horizontally(self):
+        res = cv2.flip(np.array(self.img), 1)
+        res = Image.fromarray(res)
+        self.change_img(res)
+
+    def flip_vertically(self):
+        res = cv2.flip(np.array(self.img), 0)
+        res = Image.fromarray(res)
+        self.change_img(res)
+
+    def change_resolution(self):
+        height = int(self.parent.effects_bar.height_entry.get())
+        width = int(self.parent.effects_bar.width_entry.get())
+        resized_image = cv2.resize(np.array(self.img), (height, width))
+        res = Image.fromarray(resized_image)
+        self.change_img(res)
+
+    def start_crop(self, event):
+        self.crop_start_x = event.x
+        self.crop_start_y = event.y
+        self.rectangle_id = None
+
+    def crop(self, event):
+        if self.rectangle_id:
+            self.parent.image_frame.canvas.delete(self.rectangle_id)
+
+        self.crop_end_x = event.x
+        self.crop_end_y = event.y
+
+        self.rectangle_id = self.parent.image_frame.canvas.create_rectangle(
+            self.crop_start_x, self.crop_start_y, self.crop_end_x, self.crop_end_y, width=1)
+
+    def end_crop(self, event):
+        ratio = 1
+
+        if self.crop_start_x <= self.crop_end_x and self.crop_start_y <= self.crop_end_y:
+            start_x = int(self.crop_start_x * ratio)
+            start_y = int(self.crop_start_y * ratio)
+            end_x = int(self.crop_end_x * ratio)
+            end_y = int(self.crop_end_y * ratio)
+        elif self.crop_start_x > self.crop_end_x and self.crop_start_y <= self.crop_end_y:
+            start_x = int(self.crop_end_x * ratio)
+            start_y = int(self.crop_start_y * ratio)
+            end_x = int(self.crop_start_x * ratio)
+            end_y = int(self.crop_end_y * ratio)
+        elif self.crop_start_x <= self.crop_end_x and self.crop_start_y > self.crop_end_y:
+            start_x = int(self.crop_start_x * ratio)
+            start_y = int(self.crop_end_y * ratio)
+            end_x = int(self.crop_end_x * ratio)
+            end_y = int(self.crop_start_y * ratio)
+        else:
+            start_x = int(self.crop_end_x * ratio)
+            start_y = int(self.crop_end_y * ratio)
+            end_x = int(self.crop_start_x * ratio)
+            end_y = int(self.crop_start_y * ratio)
+
+        original_width = self.img.size[0]
+        original_height = self.img.size[1]
+
+        show_width, show_height = self.parent.image_frame.show_resolution
+
+        ratio_x = original_width / show_width
+
+        start_x = int(start_x * ratio_x)
+        end_x = int(end_x * ratio_x)
+
+        ratio_y = original_height / show_height
+        start_y = int(start_y * ratio_y)
+
+        end_y = int(end_y * ratio_y)
+
+        res = np.array(self.img)[start_y: end_y, start_x: end_x]
+        res = Image.fromarray(res)
+        self.change_img(res)
+
+        self.parent.image_frame.stop_cropping()
 
     def __update_enhancer(self):
         self.parent.effects_bar.slider.get()
@@ -174,13 +300,25 @@ class ImageFrame(ttk.Frame):
         self.image_label.pack()
         self.show_resolution = (600, 450)
 
+        self.canvas = tk.Canvas(self, bg="gray", width=600, height=450)
+
     def show_img(self, res):
-        self.image_label.pack_forget()
+        self.canvas.delete("all")
         res = res.resize(self.show_resolution)
-        res = ImageTk.PhotoImage(res)
-        self.image_label = ttk.Label(self, image=res)
-        self.image_label.image = res
-        self.image_label.pack()
+
+        self.shown_image = ImageTk.PhotoImage(res)
+        self.canvas.create_image(0, 0, anchor=tk.NW, image=self.shown_image)
+        self.canvas.pack()
+
+    def start_cropping(self):
+        self.canvas.bind("<ButtonPress>", self.parent.img_UI.start_crop)
+        self.canvas.bind("<B1-Motion>", self.parent.img_UI.crop)
+        self.canvas.bind("<ButtonRelease-1>", self.parent.img_UI.end_crop)
+
+    def stop_cropping(self):
+        self.canvas.unbind("<ButtonPress>")
+        self.canvas.unbind("<B1-Motion>")
+        self.canvas.unbind("<ButtonRelease-1>")
 
 
 class MainApplication(tk.Tk):
