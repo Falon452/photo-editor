@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, ALL
 from tkinter import filedialog, Scale, HORIZONTAL
 from tkinter.colorchooser import askcolor
 from PIL import Image, ImageTk, ImageEnhance
@@ -10,8 +10,9 @@ import cv2
 import sys
 import numpy as np
 
-
 # pip install opencv-contrib-python
+global toggle
+
 
 class MenuBar(ttk.Frame):
     def __init__(self, parent):
@@ -95,6 +96,44 @@ class ImageEffectsBar(ttk.Frame):
         self.button = ttk.Button(self, text="Crop", command=self.parent.image_frame.start_cropping)
         self.button.grid(row=1, column=5)
 
+        # ADD
+        self.button = ttk.Button(self, text='Drawing', command=self.parent.img_UI.draw)
+        self.button.grid(row=1, column=6)
+
+        selected_shape = tk.StringVar()
+        self.draw_option = ttk.Combobox(self, textvariable=selected_shape)
+        self.draw_option['values'] = ['circle', 'rectangle', 'eclipse']
+
+        self.draw_option['state'] = 'readonly'
+
+        self.draw_option.grid(row=1, column=7)
+
+        def shape_changed(event):
+            self.parent.img_UI.do_capture = False
+
+        self.draw_option.bind('<<ComboboxSelected>>', shape_changed)
+
+        selected_paint_size = tk.StringVar()
+
+        self.draw_size = ttk.Combobox(self, textvariable=selected_paint_size, width=5)
+
+        self.draw_size['values'] = [1, 2, 3, 4, 5, 6, 7, 8]
+        self.draw_size['state'] = 'readonly'
+        self.draw_size.current(5)
+        self.draw_size.grid(row=1, column=8)
+
+        def paint_size_changed(event):
+            self.parent.img_UI.do_capture = False
+
+        self.draw_size.bind('<<ComboboxSelected>>', paint_size_changed)
+
+        self.slider_label = ttk.Label(self, text='Zoom: ')
+        self.slider_label.grid(row=0, column=6)
+        self.slider_zoom = ttk.Scale(self, from_=1, to=5, orient=HORIZONTAL, value=1)
+        self.slider_zoom.bind("<ButtonRelease-1>", self.parent.img_UI.do_zoom)
+        self.slider_zoom.grid(row=0, column=7)
+        # END ADD
+
     def open_window(self):
         new_window = tk.Toplevel(self.parent)
         new_window.geometry("300x150")
@@ -124,6 +163,14 @@ class ImgUI:
         self.__enhancer = None
         self.__stack = []
         self.__stack_ix = -1
+        self.do_capture = False  # ADDED
+        self.scale = 1.0  # ADDED
+        self.width_shift_start = 0
+        self.width_shift_end = 0
+        self.height_shift_start = 0
+        self.height_shift_end = 0
+        self.new_value = 1
+
 
     def set_image(self, filepath):
         self.img = cv2.imread(filepath)
@@ -221,6 +268,7 @@ class ImgUI:
         self.change_img(res)
 
     def start_crop(self, event):
+
         self.crop_start_x = event.x
         self.crop_start_y = event.y
         self.rectangle_id = None
@@ -278,6 +326,89 @@ class ImgUI:
 
         self.parent.image_frame.stop_cropping()
 
+    # ADD
+    def capture(self, flag):
+        self.do_capture = flag
+
+    def draw(self):
+        colors = askcolor(title="Color Chooser")
+        global draw_color
+        draw_color = colors[0]
+        self.parent.image_frame.draw_bind()
+
+    def drawing_effect(self, event):
+        if self.do_capture:
+            # tutaj chcielibyśmy mieć wycinek co jest na wyświetlany
+
+            width_shift = self.width_shift_end - self.width_shift_start
+            height_shift = self.height_shift_end - self.height_shift_start
+            zoomed = np.asarray(self.img)[height_shift: 450 + height_shift][width_shift:600 + width_shift]
+
+            # zoomed = np.asarray(self.img)[int(height_shift / self.new_value): int((450 + height_shift) / self.new_value)][int(width_shift / self.new_value):int((600 + width_shift) / self.new_value)]
+
+            print(height_shift, 450 + height_shift, width_shift, 600 + width_shift)
+            toggle = self.parent.effects_bar.draw_option.current()
+            paint_size = 2 * self.parent.effects_bar.draw_size.current()
+            width, height = self.parent.image_frame.show_resolution
+
+            if paint_size < 0:
+                paint_size = 4  # default value
+            # if toggle == 0:  # print circles
+            #     cv2.circle(zoomed, (int(event.x * (zoomed.shape[1] / width)), int(event.y * (zoomed.shape[0] / height))),
+            #                int(paint_size * (zoomed.shape[0] / height)), draw_color, -1)
+            if toggle == 0:  # print circles
+                cv2.circle(zoomed,
+                           (int(event.x) , int(event.y )),
+                           int(paint_size * (zoomed.shape[0] / height)), draw_color, -1)
+            elif toggle == 1:
+                cv2.rectangle(zoomed, (int(event.x * (zoomed.shape[1] / width)), int(event.y * (zoomed.shape[0] / height))), (
+                    int(event.x * (zoomed.shape[1] / width)) + int(paint_size * 2 * (zoomed.shape[0] / height)),
+                    int(event.y * (zoomed.shape[0] / height)) + int(paint_size * 2 * (zoomed.shape[0] / height))), draw_color, -1)
+            else:
+                cv2.circle(zoomed, (int(event.x * (zoomed.shape[1] / width)), int(event.y * (zoomed.shape[0] / height))),
+                           int(paint_size * 2 * (zoomed.shape[0] / height)), draw_color, int(1 * (zoomed.shape[0] / height)))
+
+            res = np.asarray(self.img)
+            res[height_shift: 450 + height_shift][width_shift:600 + width_shift] = zoomed
+            res = Image.fromarray(res)
+            self.width_shift_start = 0
+            self.height_shift_start = 0
+
+            self.change_img(res)
+
+    def do_zoom(self, new_value):
+        self.new_value = self.parent.effects_bar.slider_zoom.get()
+        size = self.parent.image_frame.show_resolution
+        resize_image = self.img.resize((int(size[0] * self.new_value), int(size[1] * self.new_value)))
+        print(resize_image.size)
+        self.img = resize_image
+
+        if self.new_value == 1:  # not working - set in the middle of frame
+            self.parent.image_frame.canvas.scan_dragto(0, 0, gain=1)
+            self.change_img(self.img)
+            return
+        self.change_img(self.img)
+
+        self.parent.image_frame.canvas.delete("all")
+        self.parent.image_frame.shown_image = ImageTk.PhotoImage(resize_image)
+        self.parent.image_frame.canvas.create_image(0, 0, anchor=tk.NW, image=self.parent.image_frame.shown_image)
+        self.parent.image_frame.canvas.pack()
+
+    def move_img(self, event):
+        if not self.width_shift_start:
+            self.width_shift_start = event.x
+            self.height_shift_start = event.y
+        self.width_shift_end = event.x
+        self.height_shift_end = event.y
+
+        print(event.x, event.y)
+        self.parent.image_frame.canvas.scan_dragto(event.x, event.y, gain=1)
+
+    def scan_img(self, event):
+        self.parent.image_frame.canvas.scan_mark(event.x, event.y)
+
+    # END ADD
+
     def __update_enhancer(self):
         self.parent.effects_bar.slider.get()
         self.__enhancer = ImageEnhance.Brightness(self.img)
@@ -302,13 +433,21 @@ class ImageFrame(ttk.Frame):
 
     def show_img(self, res):
         self.canvas.delete("all")
-        res = res.resize(self.show_resolution)
-
+        if self.parent.img_UI.new_value == 1:
+            res = res.resize(self.show_resolution)
         self.shown_image = ImageTk.PhotoImage(res)
+        # self.zoom_img = self.shown_image
         self.canvas.create_image(0, 0, anchor=tk.NW, image=self.shown_image)
+        self.zoom_bind()
         self.canvas.pack()
 
     def start_cropping(self):
+        self.parent.img_UI.do_capture = False
+
+        self.canvas.unbind("<ButtonPress-1>")
+        self.canvas.unbind("<Motion>")
+        self.canvas.unbind("<ButtonRelease-1>")
+
         self.canvas.bind("<ButtonPress>", self.parent.img_UI.start_crop)
         self.canvas.bind("<B1-Motion>", self.parent.img_UI.crop)
         self.canvas.bind("<ButtonRelease-1>", self.parent.img_UI.end_crop)
@@ -317,6 +456,15 @@ class ImageFrame(ttk.Frame):
         self.canvas.unbind("<ButtonPress>")
         self.canvas.unbind("<B1-Motion>")
         self.canvas.unbind("<ButtonRelease-1>")
+
+    def zoom_bind(self):
+        self.canvas.bind('<Control-ButtonPress-1>', self.parent.img_UI.scan_img)
+        self.canvas.bind("<Control-B1-Motion>", self.parent.img_UI.move_img)
+
+    def draw_bind(self):
+        self.canvas.bind("<Motion>", self.parent.img_UI.drawing_effect)
+        self.canvas.bind('<ButtonPress-1>', lambda event: self.parent.img_UI.capture(True))
+        self.canvas.bind("<ButtonRelease-1>", lambda event: self.parent.img_UI.capture(False))
 
 
 class MainApplication(tk.Tk):
@@ -348,7 +496,7 @@ class MainApplication(tk.Tk):
         self.effects_bar.pack(side="left", fill="x")
 
         self._bindings()
-        self.__debugging()
+        # self.__debugging()
 
     def _bindings(self):
         if sys.platform == "darwin":  # mac os
