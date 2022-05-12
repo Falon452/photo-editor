@@ -1,5 +1,6 @@
+from locale import currency
 import tkinter as tk
-from tkinter import ttk,ALL
+from tkinter import EW, NE, NSEW, RIDGE, SE, ttk, ALL
 from tkinter import filedialog, Scale, HORIZONTAL
 from tkinter.colorchooser import askcolor
 from PIL import Image, ImageTk, ImageEnhance
@@ -10,9 +11,11 @@ import cv2
 import sys
 import numpy as np
 
-
 # pip install opencv-contrib-python
 global toggle
+
+
+
 class MenuBar(ttk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
@@ -55,84 +58,127 @@ class ImageEffectsBar(ttk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
+        
+        self.button_width = 15
         self.__create_widgets()
 
+    def add_labels(self):
+        self.filter_label = ttk.Label(self , text="Filters: " , borderwidth=2, relief="groove")
+        self.filter_label.grid(row = 0 , column=0 ,columnspan=2 , sticky= EW)
+
+        self.filter_label = ttk.Label(self , text="Image convert: " , borderwidth=2, relief="groove")
+        self.filter_label.grid(row = 0 , column=2  ,columnspan=3 , sticky= EW )
+
+        self.filter_label = ttk.Label(self , text="Drawing: " , borderwidth=2, relief="groove")
+        self.filter_label.grid(row = 0 , column=5 ,columnspan=3 , sticky= EW )
+
+        self.filter_label = ttk.Label(self , text="Object recognize: " , borderwidth=2, relief="groove")
+        self.filter_label.grid(row = 0 , column=8 ,columnspan=2  , sticky= EW)
+
+
+    def add_filter_buttons(self):
+        self.button = ttk.Button(self, text="Paint Effect", command=self.parent.img_UI.paint_effect ,width=self.button_width)
+        self.button.grid(row=1, column=0)
+
+        self.button = ttk.Button(self, text="Invert Effect", command=self.parent.img_UI.invert_effect ,width=self.button_width)
+        self.button.grid(row=1, column=1)
+
+        self.button = ttk.Button(self, text="Solarize Effect", command=self.parent.img_UI.solarize_effect ,width=self.button_width)
+        self.button.grid(row=3, column=0)
+
+        self.button = ttk.Button(self, text='Filter Color', command=self.parent.img_UI.change_color ,width=self.button_width)
+        self.button.grid(row=3, column=1)
+       
+    def add_convert_buttons(self):
+        self.button = ttk.Button(self, text="Rotate Left", command=self.parent.img_UI.rotate_left ,width=self.button_width)
+        self.button.grid(row=1, column=2)
+
+        self.button = ttk.Button(self, text="Rotate Right", command=self.parent.img_UI.rotate_right ,width=self.button_width)
+        self.button.grid(row=1, column=3)
+
+
+        self.button = ttk.Button(self, text="Flip Horizontally", command=self.parent.img_UI.flip_horizontally ,width=self.button_width)
+        self.button.grid(row=3, column=2)
+
+        self.button = ttk.Button(self, text="Flip Vertically", command=self.parent.img_UI.flip_vertically ,width=self.button_width)
+        self.button.grid(row=3, column=3)
+
+        self.button = ttk.Button(self, text="Resolution", command=self.open_window ,width=self.button_width)
+        self.button.grid(row=1, column=4)
+
+        self.button = ttk.Button(self, text="Crop", command=self.parent.image_frame.start_cropping ,width=self.button_width)
+        self.button.grid(row=3, column=4)
+
     def __create_widgets(self):
-        self.button = ttk.Button(self, text="Paint Effect", command=self.parent.img_UI.paint_effect)
-        self.button.grid(row=0, column=0)
+        self.add_labels()
+        self.add_filter_buttons()
+        self.add_convert_buttons()
 
-        self.button = ttk.Button(self, text="Invert Effect", command=self.parent.img_UI.invert_effect)
-        self.button.grid(row=0, column=1)
 
-        self.button = ttk.Button(self, text="Solarize Effect", command=self.parent.img_UI.solarize_effect)
-        self.button.grid(row=0, column=2)
-
-        self.button = ttk.Button(self, text='Filter Color', command=self.parent.img_UI.change_color)
-        self.button.grid(row=0, column=3)
+        # Sliders
 
         self.slider_label = ttk.Label(self, text='Brightness: ')
-        self.slider_label.grid(row=0, column=4)
+        self.slider_label.grid(row=0, column=10 , sticky=NE  , rowspan=2)
 
         self.slider = ttk.Scale(self, from_=0, to=2, orient=HORIZONTAL, value=1)
         self.slider.bind("<ButtonRelease-1>", self.parent.img_UI.brightness_effect)
-        self.slider.grid(row=0, column=5)
+        self.slider.grid(row=0, column=11 , sticky=NE , rowspan=2)
 
-        self.button = ttk.Button(self, text="Rotate Right", command=self.parent.img_UI.rotate_right)
-        self.button.grid(row=1, column=0)
+        self.slider_label = ttk.Label(self, text='Zoom: ' )
+        self.slider_label.grid(row=2, column=10, sticky=SE , rowspan=2)
+        self.slider_zoom = ttk.Scale(self, from_=1, to=5, orient=HORIZONTAL, value=1)
+        self.slider_zoom.bind("<ButtonRelease-1>", self.parent.img_UI.do_zoom)
+        self.slider_zoom.grid(row=2, column=11,sticky=SE , rowspan=2)
 
-        self.button = ttk.Button(self, text="Rotate Left", command=self.parent.img_UI.rotate_left)
-        self.button.grid(row=1, column=1)
+        #Draw effects fields
 
-        self.button = ttk.Button(self, text="Flip Horizontally", command=self.parent.img_UI.flip_horizontally)
-        self.button.grid(row=1, column=2)
-
-        self.button = ttk.Button(self, text="Flip Vertically", command=self.parent.img_UI.flip_vertically)
-        self.button.grid(row=1, column=3)
-
-        self.button = ttk.Button(self, text="Resolution", command=self.open_window)
-        self.button.grid(row=1, column=4)
-
-        self.button = ttk.Button(self, text="Crop", command=self.parent.image_frame.start_cropping)
+        self.button = ttk.Button(self, text='Color', command=self.parent.img_UI.draw ,width=self.button_width//2)
         self.button.grid(row=1, column=5)
 
 
-        #ADD
-        self.button = ttk.Button(self, text='Drawing', command=self.parent.img_UI.draw)
-        self.button.grid(row=1, column=6)
-
+        self.shape_label = ttk.Label(self , text="Shape: " ,width=self.button_width//2)
+        self.shape_label.grid(row = 1 , column=6)
+        self.selected_shape = tk.StringVar()
+        self.draw_option = ttk.Combobox(self, textvariable=self.selected_shape  , width=18 , state="readonly")
+        self.draw_option['values'] = ['circle', 'rectangle', 'triangle']
+        self.draw_option.current(0)
         
-        selected_shape = tk.StringVar()
-        self.draw_option = ttk.Combobox(self, textvariable=selected_shape)
-        self.draw_option['values'] = ['circle', 'rectangle' ,'eclipse']
-        
-        self.draw_option['state'] = 'readonly'
-
         self.draw_option.grid(row=1, column=7)
+
+        self.shape_label = ttk.Label(self , text="Effect: " ,width=self.button_width//2)
+        self.shape_label.grid(row = 3 , column=6)
+       
+        self.selected_effect_option = tk.StringVar()
+        
+        self.selected_draw_effect = tk.StringVar()
+        self.effect_option = ttk.Combobox(self, textvariable=self.selected_effect_option  , width=18 , state="readonly")
+        self.effect_option['values'] = ['filled', 'very light border','light border' , 'medium border' , "solid border" ]
+        self.effect_option.current(0)
+     
+
+        self.effect_option.grid(row=3, column=7)
+
         def shape_changed(event):
-            self.parent.img_UI.do_capture=False
+            self.parent.img_UI.do_capture = False
+
         self.draw_option.bind('<<ComboboxSelected>>', shape_changed)
 
+        self.selected_paint_size = tk.StringVar()
 
-        selected_paint_size = tk.StringVar()
+        self.draw_size = ttk.Combobox(self, textvariable=self.selected_paint_size, width=4 , state="readonly" )
+ 
+        self.draw_size['values'] = [2,3,4,5,6,7,8,9,10,11,12,13,14,15]
         
-        self.draw_size = ttk.Combobox(self, textvariable=selected_paint_size ,width=5)
-        
-        self.draw_size['values'] = [1,2,3,4,5,6,7,8]
-        self.draw_size['state'] = 'readonly'
         self.draw_size.current(5)
-        self.draw_size.grid(row=1, column=8)
-        def  paint_size_changed(event):
-            self.parent.img_UI.do_capture=False
-        self.draw_size.bind('<<ComboboxSelected>>',  paint_size_changed)
-        
+        self.draw_size.grid(row=3, column=5)
 
-        self.slider_label = ttk.Label(self, text='Zoom: ')
-        self.slider_label.grid(row=0, column=6)
-        self.slider_zoom = ttk.Scale(self, from_=1, to=5, orient=HORIZONTAL, value=1)
-        self.slider_zoom.bind("<ButtonRelease-1>", self.parent.img_UI.do_zoom)
-        self.slider_zoom.grid(row=0, column=7)
-        #END ADD
+        def paint_size_changed(event):
+            self.parent.img_UI.do_capture = False
 
+        self.draw_size.bind('<<ComboboxSelected>>', paint_size_changed)
+
+       
+        # END ADD
 
     def open_window(self):
         new_window = tk.Toplevel(self.parent)
@@ -163,9 +209,14 @@ class ImgUI:
         self.__enhancer = None
         self.__stack = []
         self.__stack_ix = -1
-        self.do_capture = False  #ADDED
-        self.scale= 1.0 #ADDED
-       
+        self.do_capture = False  # ADDED
+        self.scale = 1.0  # ADDED
+        self.width_shift_start = 0
+        self.width_shift_end = 0
+        self.height_shift_start = 0
+        self.height_shift_end = 0
+        self.new_value = 1
+
 
     def set_image(self, filepath):
         self.img = cv2.imread(filepath)
@@ -173,6 +224,7 @@ class ImgUI:
         self.img = Image.fromarray(self.img)
         self.__add_to_stack()
         self.__update_enhancer()
+        self.img = self.img.resize(self.parent.image_frame.show_resolution)
         self.parent.image_frame.show_img(self.img)
 
     def save_image(self):
@@ -263,7 +315,7 @@ class ImgUI:
         self.change_img(res)
 
     def start_crop(self, event):
-        
+
         self.crop_start_x = event.x
         self.crop_start_y = event.y
         self.rectangle_id = None
@@ -321,61 +373,102 @@ class ImgUI:
 
         self.parent.image_frame.stop_cropping()
 
-    #ADD
-    def capture(self,flag):
-            self.do_capture = flag
+    # ADD
+    def capture(self, flag):
+        self.do_capture = flag
 
     def draw(self):
         colors = askcolor(title="Color Chooser")
-        global draw_color 
+        global draw_color
         draw_color = colors[0]
         self.parent.image_frame.draw_bind()
-    
 
-    def drawing_effect(self,event):
+   
+
+
+    def drawing_effect(self, event):
         if self.do_capture:
-            res= np.asarray(self.img)
+            # tutaj chcielibyśmy mieć wycinek co jest na wyświetlany
+            effect_map = [-1 , 1,2, 3,6]
+
+            width_shift = self.width_shift_end - self.width_shift_start
+            height_shift = self.height_shift_end - self.height_shift_start
+            zoomed = np.asarray(self.img)[height_shift: 450 + height_shift][width_shift:600 + width_shift]
+
+            # zoomed = np.asarray(self.img)[int(height_shift / self.new_value): int((450 + height_shift) / self.new_value)][int(width_shift / self.new_value):int((600 + width_shift) / self.new_value)]
+
+            print(height_shift, 450 + height_shift, width_shift, 600 + width_shift)
             toggle = self.parent.effects_bar.draw_option.current()
-            paint_size =2*self.parent.effects_bar.draw_size.current()
-            if paint_size<0:
-                paint_size = 4 #default value
-            if  toggle==0: # print circles
-                cv2.circle(res,(int((event.x)*(res.shape[1]/600)),int((event.y)*(res.shape[0]/450))),int(paint_size*(res.shape[0]/450)),draw_color, -1)
-            elif  toggle==1:
-                cv2.rectangle(res,(int((event.x)*(res.shape[1]/600)),int((event.y)*(res.shape[0]/450))),(int((event.x)*(res.shape[1]/600))+int(paint_size*2*(res.shape[0]/450)),int((event.y)*(res.shape[0]/450))+int(paint_size*2*(res.shape[0]/450))),draw_color,-1)
-            else:
-                cv2.circle(res,(int((event.x)*(res.shape[1]/600)),int((event.y)*(res.shape[0]/450))),int(paint_size*2*(res.shape[0]/450)),draw_color,int(1*(res.shape[0]/450)))
-            
-            
+            paint_size = 2 * self.parent.effects_bar.draw_size.current()
+            effect_idx =self.parent.effects_bar.effect_option.current()
+            width, height = self.parent.image_frame.show_resolution
+
+            if paint_size < 0:
+                paint_size = 4  # default value
+      
+            if toggle == 0:  # print circles
+                cv2.circle(zoomed, (int(event.x) , int(event.y)),
+                        #    (int(event.x * (zoomed.shape[1] / width)), int(event.y * (zoomed.shape[0] / height))),
+                           int(paint_size * (zoomed.shape[0] / height)), draw_color, effect_map[effect_idx])
+            elif toggle == 1:
+                cv2.rectangle(zoomed, (int(event.x) , int(event.y)),
+                    int(event.x * (zoomed.shape[1] / width)) + int(paint_size * 2 * (zoomed.shape[0] / height)),
+                    int(event.y * (zoomed.shape[0] / height)) + int(paint_size * 2 * (zoomed.shape[0] / height)), draw_color, effect_map[effect_idx])
+                      #(int(event.x * (zoomed.shape[1] / width)), int(event.y * (zoomed.shape[0] / height))), (
+            elif toggle == 2:
+
+                new_x = int(event.x) #, int(event.x * (zoomed.shape[1] / width))
+                new_y =  int(event.y) 
+                painting_size = int(paint_size ) *2
+                pts = np.array([[new_x , new_y +  painting_size* 0.66], [new_x - painting_size*0.5, new_y- painting_size* 0.33],
+                 [new_x + painting_size*0.5, new_y -painting_size* 0.33]] , np.int32)
+
+               
+                if effect_idx==0:
+                    cv2.fillPoly(zoomed,[pts],draw_color )
+                else:
+                    pts = pts.reshape((-1,1,2))
+                    cv2.polylines(zoomed,[pts],True,draw_color , 	thickness=effect_map[effect_idx])
+            res = np.asarray(self.img)
+            res[height_shift: 450 + height_shift][width_shift:600 + width_shift] = zoomed
             res = Image.fromarray(res)
+            self.width_shift_start = 0
+            self.height_shift_start = 0
+
             self.change_img(res)
 
-
-
-    def do_zoom(self,new_value):
-        new_value = self.parent.effects_bar.slider_zoom.get()
+    def do_zoom(self, new_value):
+        self.new_value = self.parent.effects_bar.slider_zoom.get()
         size = self.parent.image_frame.show_resolution
-        resize_image = self.img.resize((int(size[0]*new_value) , int(size[1]*new_value)))
-        self.img=resize_image
-        if new_value == 1:   #not working - set in the middle of frame
+        resize_image = self.img.resize((int(size[0] * self.new_value), int(size[1] * self.new_value)))
+        print(resize_image.size)
+        self.img = resize_image
+
+        if self.new_value == 1:  # not working - set in the middle of frame
             self.parent.image_frame.canvas.scan_dragto(0, 0, gain=1)
             self.change_img(self.img)
             return
         self.change_img(self.img)
+
         self.parent.image_frame.canvas.delete("all")
         self.parent.image_frame.shown_image = ImageTk.PhotoImage(resize_image)
-        self.parent.image_frame.canvas.create_image(0,0, anchor=tk.NW, image=self.parent.image_frame.shown_image)
+        self.parent.image_frame.canvas.create_image(0, 0, anchor=tk.NW, image=self.parent.image_frame.shown_image)
         self.parent.image_frame.canvas.pack()
 
-       
+    def move_img(self, event):
+        if not self.width_shift_start:
+            self.width_shift_start = event.x
+            self.height_shift_start = event.y
+        self.width_shift_end = event.x
+        self.height_shift_end = event.y
 
-    def move_img(self,event):
-        #print(event.x, event.y)
+        print(event.x, event.y)
         self.parent.image_frame.canvas.scan_dragto(event.x, event.y, gain=1)
 
-    def scan_img(self,event):
+    def scan_img(self, event):
         self.parent.image_frame.canvas.scan_mark(event.x, event.y)
-    #END ADD
+
+    # END ADD
 
     def __update_enhancer(self):
         self.parent.effects_bar.slider.get()
@@ -389,7 +482,6 @@ class ImgUI:
         self.__stack_ix += 1
 
 
-
 class ImageFrame(ttk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
@@ -397,21 +489,23 @@ class ImageFrame(ttk.Frame):
         self.image_label = ttk.Label(self)
         self.image_label.pack()
         self.show_resolution = (600, 450)
-        
+
         self.canvas = tk.Canvas(self, bg="gray", width=600, height=450)
 
     def show_img(self, res):
         self.canvas.delete("all")
-        res = res.resize(self.show_resolution)
+        if self.parent.img_UI.new_value == 1:
+            res = res.resize(self.show_resolution)
         self.shown_image = ImageTk.PhotoImage(res)
-        #self.zoom_img = self.shown_image
+        # self.zoom_img = self.shown_image
         self.canvas.create_image(0, 0, anchor=tk.NW, image=self.shown_image)
         self.zoom_bind()
+      
         self.canvas.pack()
 
     def start_cropping(self):
-        self.parent.img_UI.do_capture = False 
-        
+        self.parent.img_UI.do_capture = False
+
         self.canvas.unbind("<ButtonPress-1>")
         self.canvas.unbind("<Motion>")
         self.canvas.unbind("<ButtonRelease-1>")
@@ -425,17 +519,14 @@ class ImageFrame(ttk.Frame):
         self.canvas.unbind("<B1-Motion>")
         self.canvas.unbind("<ButtonRelease-1>")
 
-
     def zoom_bind(self):
-        self.canvas.bind('<Control-ButtonPress-1>',self.parent.img_UI.scan_img)
-        self.canvas.bind("<Control-B1-Motion>", self.parent.img_UI.move_img )        
-
+        self.canvas.bind('<Control-ButtonPress-1>', self.parent.img_UI.scan_img)
+        self.canvas.bind("<Control-B1-Motion>", self.parent.img_UI.move_img)
 
     def draw_bind(self):
         self.canvas.bind("<Motion>", self.parent.img_UI.drawing_effect)
         self.canvas.bind('<ButtonPress-1>', lambda event: self.parent.img_UI.capture(True))
         self.canvas.bind("<ButtonRelease-1>", lambda event: self.parent.img_UI.capture(False))
-
 
 
 class MainApplication(tk.Tk):
@@ -444,8 +535,8 @@ class MainApplication(tk.Tk):
 
         self.title("Photo Editor")
 
-        window_width = 800
-        window_height = 600
+        window_width  = 1000 #800
+        window_height = 700  #600
 
         self.minsize(window_width, window_height)
 
@@ -467,7 +558,7 @@ class MainApplication(tk.Tk):
         self.effects_bar.pack(side="left", fill="x")
 
         self._bindings()
-        #self.__debugging()
+        # self.__debugging()
 
     def _bindings(self):
         if sys.platform == "darwin":  # mac os
