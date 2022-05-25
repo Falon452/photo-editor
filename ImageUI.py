@@ -23,12 +23,11 @@ class ImgUI:
         self.__stack_ix = -1
         self.do_capture = False  # ADDED
         self.scale = 1.0  # ADDED
-        self.width_shift_start = 0
-        self.width_shift_end = 0
-        self.height_shift_start = 0
-        self.height_shift_end = 0
         self.width_move = 0  # vector of move in zoom
+        self.height_move = 0  # vector of move in zoom
         self.new_value = 1
+        self.last_event_x = None
+        self.last_event_y = None
 
     def set_image(self, filepath):
         self.img = cv2.imread(filepath)
@@ -198,65 +197,48 @@ class ImgUI:
 
     def drawing_effect(self, event):
         if self.do_capture:
-            # tutaj chcielibyśmy mieć wycinek co jest na wyświetlany
             effect_map = [-1, 1, 2, 3, 6]
 
-            width_shift = self.width_shift_end - self.width_shift_start
-            height_shift = self.height_shift_end - self.height_shift_start
-            zoomed = np.asarray(self.img)[height_shift: 450 + height_shift][width_shift:600 + width_shift]
+            self.img = np.asarray(self.img)
 
-            # zoomed = np.asarray(self.img)[int(height_shift / self.new_value): int((450 + height_shift) / self.new_value)][int(width_shift / self.new_value):int((600 + width_shift) / self.new_value)]
+            x, y = int(event.x - self.width_move), int(event.y - self.height_move)
 
-            print(height_shift, 450 + height_shift, width_shift, 600 + width_shift)
             toggle = self.parent.effects_bar.draw_option.current()
             paint_size = 2 * self.parent.effects_bar.draw_size.current()
             effect_idx = self.parent.effects_bar.effect_option.current()
             width, height = self.parent.image_frame.show_resolution
 
             if paint_size < 0:
-                paint_size = 4  # default value
+                paint_size = 4
 
-            if toggle == 0:  # print circles
-                cv2.circle(zoomed, (int(event.x), int(event.y)),
-                           #    (int(event.x * (zoomed.shape[1] / width)), int(event.y * (zoomed.shape[0] / height))),
-                           int(paint_size * (zoomed.shape[0] / height)), draw_color, effect_map[effect_idx])
+            if toggle == 0:
+                cv2.circle(self.img, (x, y),
+                           int(paint_size * (self.img.shape[0] / height)), draw_color, effect_map[effect_idx])
             elif toggle == 1:
-                cv2.rectangle(zoomed, (int(event.x), int(event.y)), (
-                    int(event.x * (zoomed.shape[1] / width)) + int(paint_size * 2 * (zoomed.shape[0] / height)),
-                    int(event.y * (zoomed.shape[0] / height)) + int(paint_size * 2 * (zoomed.shape[0] / height))),
+                cv2.rectangle(self.img, (x, y), (
+                    int(x * (self.img.shape[1] / width)) + int(paint_size * 2 * (self.img.shape[0] / height)),
+                    int(y * (self.img.shape[0] / height)) + int(paint_size * 2 * (self.img.shape[0] / height))),
                               draw_color, effect_map[effect_idx])
-
-
-
-            # cv2.rectangle(zoomed, (int(event.x) , int(event.y)),(int(event.x * (zoomed.shape[1] / width)), int(event.y * (zoomed.shape[0] / height))),  int(paint_size * (zoomed.shape[0] / height)), draw_color, effect_map[effect_idx])
-            # (int(event.x * (zoomed.shape[1] / width)), int(event.y * (zoomed.shape[0] / height))), (
             elif toggle == 2:
-
-                new_x = int(event.x)  # , int(event.x * (zoomed.shape[1] / width))
-                new_y = int(event.y)
                 painting_size = int(paint_size) * 2
                 pts = np.array(
-                    [[new_x, new_y + painting_size * 0.66], [new_x - painting_size * 0.5, new_y - painting_size * 0.33],
-                     [new_x + painting_size * 0.5, new_y - painting_size * 0.33]], np.int32)
+                    [[x, y + painting_size * 0.66], [x - painting_size * 0.5, y - painting_size * 0.33],
+                     [x + painting_size * 0.5, y - painting_size * 0.33]], np.int32)
 
                 if effect_idx == 0:
-                    cv2.fillPoly(zoomed, [pts], draw_color)
+                    cv2.fillPoly(self.img, [pts], draw_color)
                 else:
                     pts = pts.reshape((-1, 1, 2))
-                    cv2.polylines(zoomed, [pts], True, draw_color, thickness=effect_map[effect_idx])
-            res = np.asarray(self.img)
-            res[height_shift: 450 + height_shift][width_shift:600 + width_shift] = zoomed
-            res = Image.fromarray(res)
-            self.width_shift_start = 0
-            self.height_shift_start = 0
+                    cv2.polylines(self.img, [pts], True, draw_color, thickness=effect_map[effect_idx])
 
+            res = np.asarray(self.img)
+            res = Image.fromarray(res)
             self.change_img(res)
 
     def do_zoom(self, new_value):
         self.new_value = self.parent.effects_bar.slider_zoom.get()
         size = self.parent.image_frame.show_resolution
         resize_image = self.img.resize((int(size[0] * self.new_value), int(size[1] * self.new_value)))
-        print(resize_image.size)
         self.img = resize_image
 
         if self.new_value == 1:  # not working - set in the middle of frame
@@ -271,16 +253,15 @@ class ImgUI:
         self.parent.image_frame.canvas.pack()
 
     def move_img(self, event):
-        if not self.width_shift_start:
-            self.width_shift_start = event.x
-            self.height_shift_start = event.y
-        self.width_shift_end = event.x
-        self.height_shift_end = event.y
-        self.width_move += (self.width_shift_end - self.width_shift_start)
-        self.width_shift_start = 0
-        self.height_shift_start = 0
-        print(event.x, event.y)
-        self.parent.image_frame.canvas.scan_dragto(event.x, event.y, gain=1)
+        if not self.last_event_x or abs(event.x - self.last_event_x) > 10:
+            self.last_event_x = event.x
+            self.last_event_y = event.y
+        else:
+            self.width_move += event.x - self.last_event_x
+            self.height_move += event.y - self.last_event_y
+            self.last_event_x = event.x
+            self.last_event_y = event.y
+            self.parent.image_frame.canvas.scan_dragto(event.x, event.y, gain=1)
 
     def scan_img(self, event):
         self.parent.image_frame.canvas.scan_mark(event.x, event.y)
