@@ -58,7 +58,7 @@ class MainApplication(tk.Tk):
         self.effects_bar.pack(side="left", fill="x")
 
         self._bindings()
-        self.__debugging()
+        # self.__debugging()
 
     def _bindings(self):
         if sys.platform == "darwin":  # mac os
@@ -72,8 +72,8 @@ class MainApplication(tk.Tk):
             self.bind('<Control-o>', lambda event: self.img_UI.open_image())
             self.bind('<Control-s>', lambda event: self.img_UI.save_image())
 
-    def __debugging(self):
-        self.img_UI.set_image(filepath=r'C:\somepics\blackwoman.jpg')
+    # def __debugging(self):
+    #     self.img_UI.set_image(filepath=r'C:\somepics\blackwoman.jpg')
 
 
 if __name__ == '__main__':
