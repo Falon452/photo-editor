@@ -50,6 +50,7 @@ class ImgUI:
                                               filetypes=(("PNG files", "*.png"), ("JPG files", "*.jpg"),
                                                          ("all files", "*.*")))
         if filepath:
+            self.__clear_stack()
             self.set_image(filepath)
 
     def change_img(self, res, brightness_effect=False, add_to_stack=True):
@@ -327,6 +328,10 @@ class ImgUI:
     def __update_enhancer(self):
         self.parent.effects_bar.slider.get()
         self.__enhancer = ImageEnhance.Brightness(self.img)
+
+    def __clear_stack(self):
+        self.__stack.clear()
+        self.__stack_ix = 0
 
     def __add_to_stack(self):
         if self.__stack_ix < len(self.__stack) - 1:
