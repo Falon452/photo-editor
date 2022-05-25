@@ -89,12 +89,14 @@ class ImgUI:
             self.__stack_ix = max(0, self.__stack_ix - 1)
             self.parent.image_frame.show_img(self.__stack[self.__stack_ix])
             self.img = self.__stack[self.__stack_ix]
+            self.__update_enhancer()
 
     def redo(self):
         if self.__stack:
             self.__stack_ix = min(len(self.__stack) - 1, self.__stack_ix + 1)
             self.parent.image_frame.show_img(self.__stack[self.__stack_ix])
             self.img = self.__stack[self.__stack_ix]
+            self.__update_enhancer()
 
     def change_color(self):
         colors = askcolor(title="Color Chooser")
