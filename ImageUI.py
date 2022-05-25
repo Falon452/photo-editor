@@ -27,6 +27,7 @@ class ImgUI:
         self.width_shift_end = 0
         self.height_shift_start = 0
         self.height_shift_end = 0
+        self.width_move = 0 #vector of move in zoom
         self.new_value = 1
 
 
@@ -34,9 +35,10 @@ class ImgUI:
         self.img = cv2.imread(filepath)
         self.img = cv2.cvtColor(self.img, cv2.COLOR_BGR2RGB)
         self.img = Image.fromarray(self.img)
+        self.img = self.img.resize(self.parent.image_frame.show_resolution)
+       
         self.__add_to_stack()
         self.__update_enhancer()
-        self.img = self.img.resize(self.parent.image_frame.show_resolution)
         self.parent.image_frame.show_img(self.img)
 
     def save_image(self):
@@ -253,6 +255,7 @@ class ImgUI:
 
             self.change_img(res)
 
+
     def do_zoom(self, new_value):
         self.new_value = self.parent.effects_bar.slider_zoom.get()
         size = self.parent.image_frame.show_resolution
@@ -277,13 +280,33 @@ class ImgUI:
             self.height_shift_start = event.y
         self.width_shift_end = event.x
         self.height_shift_end = event.y
-
+        self.width_move += (self.width_shift_end - self.width_shift_start)
+        self.width_shift_start = 0
+        self.height_shift_start = 0
         print(event.x, event.y)
         self.parent.image_frame.canvas.scan_dragto(event.x, event.y, gain=1)
 
     def scan_img(self, event):
         self.parent.image_frame.canvas.scan_mark(event.x, event.y)
 
+    def text_effect(self):
+        self.parent.image_frame.add_text_bind()
+        
+    def add_text(self ,event):
+        self.new_value = self.parent.effects_bar.slider_zoom.get()
+        size = self.parent.image_frame.show_resolution
+        self.img = self.img.resize((int(size[0] * self.new_value), int(size[1] * self.new_value)))
+        
+        paint_size = self.parent.effects_bar.draw_size.current()
+           
+        if paint_size < 0:
+            paint_size = 4  # default value
+        text = self.parent.effects_bar.text_input.get()
+        tmp_img = np.asarray(self.img)
+        image_with_text =cv2.putText(img=tmp_img, text=text, org=(event.x + self.width_move, event.y), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=paint_size, color=draw_color,thickness=paint_size)
+        res = Image.fromarray(image_with_text)
+        self.change_img(res)
+      
     # END ADD
     #opencv
     def detect_face(self):
