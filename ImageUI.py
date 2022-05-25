@@ -195,8 +195,6 @@ class ImgUI:
         draw_color = colors[0]
         self.parent.image_frame.draw_bind()
 
-   
-
 
     def drawing_effect(self, event):
         if self.do_capture:
@@ -309,7 +307,20 @@ class ImgUI:
     def pattern_match(self):
         res = self.parent.cv.pattern_match(self.img)
         self.change_img(res)
-    #end opencv
+
+    # computional photography
+    def denoise(self):
+        res = self.parent.comp_photo.denoise(self.img)
+        self.change_img(res)
+
+    def inpaint(self):
+        res = self.parent.comp_photo.inpaint(self.img)
+        self.change_img(res)
+
+    def hdr(self):
+        res = self.parent.comp_photo.hdr(self.img)
+        self.change_img(res)
+    # end computional photography
 
     def __update_enhancer(self):
         self.parent.effects_bar.slider.get()
