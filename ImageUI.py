@@ -1,4 +1,3 @@
-
 from locale import currency
 from tkinter import EW, NE, NSEW, RIDGE, SE, ttk, ALL
 from tkinter import filedialog, Scale, HORIZONTAL
@@ -14,6 +13,7 @@ import cv2
 import sys
 import numpy as np
 
+
 class ImgUI:
     def __init__(self, parent):
         self.parent = parent
@@ -27,16 +27,17 @@ class ImgUI:
         self.width_shift_end = 0
         self.height_shift_start = 0
         self.height_shift_end = 0
+        self.width_move = 0  # vector of move in zoom
         self.new_value = 1
-
 
     def set_image(self, filepath):
         self.img = cv2.imread(filepath)
         self.img = cv2.cvtColor(self.img, cv2.COLOR_BGR2RGB)
         self.img = Image.fromarray(self.img)
+        self.img = self.img.resize(self.parent.image_frame.show_resolution)
+
         self.__add_to_stack()
         self.__update_enhancer()
-        self.img = self.img.resize(self.parent.image_frame.show_resolution)
         self.parent.image_frame.show_img(self.img)
 
     def save_image(self):
@@ -195,11 +196,10 @@ class ImgUI:
         draw_color = colors[0]
         self.parent.image_frame.draw_bind()
 
-
     def drawing_effect(self, event):
         if self.do_capture:
             # tutaj chcielibyśmy mieć wycinek co jest na wyświetlany
-            effect_map = [-1 , 1,2, 3,6]
+            effect_map = [-1, 1, 2, 3, 6]
 
             width_shift = self.width_shift_end - self.width_shift_start
             height_shift = self.height_shift_end - self.height_shift_start
@@ -210,39 +210,40 @@ class ImgUI:
             print(height_shift, 450 + height_shift, width_shift, 600 + width_shift)
             toggle = self.parent.effects_bar.draw_option.current()
             paint_size = 2 * self.parent.effects_bar.draw_size.current()
-            effect_idx =self.parent.effects_bar.effect_option.current()
+            effect_idx = self.parent.effects_bar.effect_option.current()
             width, height = self.parent.image_frame.show_resolution
 
             if paint_size < 0:
                 paint_size = 4  # default value
-      
+
             if toggle == 0:  # print circles
-                cv2.circle(zoomed, (int(event.x) , int(event.y)),
-                        #    (int(event.x * (zoomed.shape[1] / width)), int(event.y * (zoomed.shape[0] / height))),
+                cv2.circle(zoomed, (int(event.x), int(event.y)),
+                           #    (int(event.x * (zoomed.shape[1] / width)), int(event.y * (zoomed.shape[0] / height))),
                            int(paint_size * (zoomed.shape[0] / height)), draw_color, effect_map[effect_idx])
             elif toggle == 1:
-                    cv2.rectangle(zoomed, (int(event.x ), int(event.y )), (
+                cv2.rectangle(zoomed, (int(event.x), int(event.y)), (
                     int(event.x * (zoomed.shape[1] / width)) + int(paint_size * 2 * (zoomed.shape[0] / height)),
-                    int(event.y * (zoomed.shape[0] / height)) + int(paint_size * 2 * (zoomed.shape[0] / height))), draw_color,  effect_map[effect_idx])
+                    int(event.y * (zoomed.shape[0] / height)) + int(paint_size * 2 * (zoomed.shape[0] / height))),
+                              draw_color, effect_map[effect_idx])
 
 
 
-                # cv2.rectangle(zoomed, (int(event.x) , int(event.y)),(int(event.x * (zoomed.shape[1] / width)), int(event.y * (zoomed.shape[0] / height))),  int(paint_size * (zoomed.shape[0] / height)), draw_color, effect_map[effect_idx])
-                      #(int(event.x * (zoomed.shape[1] / width)), int(event.y * (zoomed.shape[0] / height))), (
+            # cv2.rectangle(zoomed, (int(event.x) , int(event.y)),(int(event.x * (zoomed.shape[1] / width)), int(event.y * (zoomed.shape[0] / height))),  int(paint_size * (zoomed.shape[0] / height)), draw_color, effect_map[effect_idx])
+            # (int(event.x * (zoomed.shape[1] / width)), int(event.y * (zoomed.shape[0] / height))), (
             elif toggle == 2:
 
-                new_x = int(event.x) #, int(event.x * (zoomed.shape[1] / width))
-                new_y =  int(event.y) 
-                painting_size = int(paint_size ) *2
-                pts = np.array([[new_x , new_y +  painting_size* 0.66], [new_x - painting_size*0.5, new_y- painting_size* 0.33],
-                 [new_x + painting_size*0.5, new_y -painting_size* 0.33]] , np.int32)
+                new_x = int(event.x)  # , int(event.x * (zoomed.shape[1] / width))
+                new_y = int(event.y)
+                painting_size = int(paint_size) * 2
+                pts = np.array(
+                    [[new_x, new_y + painting_size * 0.66], [new_x - painting_size * 0.5, new_y - painting_size * 0.33],
+                     [new_x + painting_size * 0.5, new_y - painting_size * 0.33]], np.int32)
 
-               
-                if effect_idx==0:
-                    cv2.fillPoly(zoomed,[pts],draw_color )
+                if effect_idx == 0:
+                    cv2.fillPoly(zoomed, [pts], draw_color)
                 else:
-                    pts = pts.reshape((-1,1,2))
-                    cv2.polylines(zoomed,[pts],True,draw_color , 	thickness=effect_map[effect_idx])
+                    pts = pts.reshape((-1, 1, 2))
+                    cv2.polylines(zoomed, [pts], True, draw_color, thickness=effect_map[effect_idx])
             res = np.asarray(self.img)
             res[height_shift: 450 + height_shift][width_shift:600 + width_shift] = zoomed
             res = Image.fromarray(res)
@@ -275,15 +276,37 @@ class ImgUI:
             self.height_shift_start = event.y
         self.width_shift_end = event.x
         self.height_shift_end = event.y
-
+        self.width_move += (self.width_shift_end - self.width_shift_start)
+        self.width_shift_start = 0
+        self.height_shift_start = 0
         print(event.x, event.y)
         self.parent.image_frame.canvas.scan_dragto(event.x, event.y, gain=1)
 
     def scan_img(self, event):
         self.parent.image_frame.canvas.scan_mark(event.x, event.y)
 
+    def text_effect(self):
+        self.parent.image_frame.add_text_bind()
+
+    def add_text(self, event):
+        self.new_value = self.parent.effects_bar.slider_zoom.get()
+        size = self.parent.image_frame.show_resolution
+        self.img = self.img.resize((int(size[0] * self.new_value), int(size[1] * self.new_value)))
+
+        paint_size = self.parent.effects_bar.draw_size.current()
+
+        if paint_size < 0:
+            paint_size = 4  # default value
+        text = self.parent.effects_bar.text_input.get()
+        tmp_img = np.asarray(self.img)
+        image_with_text = cv2.putText(img=tmp_img, text=text, org=(event.x + self.width_move, event.y),
+                                      fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=paint_size, color=draw_color,
+                                      thickness=paint_size)
+        res = Image.fromarray(image_with_text)
+        self.change_img(res)
+
     # END ADD
-    #opencv
+    # opencv
     def detect_face(self):
         res = self.parent.cv.detect_face(self.img)
         self.change_img(res)
@@ -295,7 +318,7 @@ class ImgUI:
     def detect_smile(self):
         res = self.parent.cv.detect_smile(self.img)
         self.change_img(res)
-    
+
     def detect_cars(self):
         res = self.parent.cv.detect_cars(self.img)
         self.change_img(res)
@@ -308,7 +331,6 @@ class ImgUI:
         res = self.parent.cv.pattern_match(self.img)
         self.change_img(res)
 
-    # computional photography
     def denoise(self):
         res = self.parent.comp_photo.denoise(self.img)
         self.change_img(res)
@@ -320,7 +342,6 @@ class ImgUI:
     def hdr(self):
         res = self.parent.comp_photo.hdr(self.img)
         self.change_img(res)
-    # end computional photography
 
     def __update_enhancer(self):
         self.parent.effects_bar.slider.get()
@@ -332,4 +353,5 @@ class ImgUI:
 
         self.__stack.append(self.img)
         self.__stack_ix += 1
+
 

@@ -13,7 +13,8 @@ class ComputionalPhotography:
         return res
 
     def inpaint(self, img):
-        return cv2.inpaint(img, mask, 3, cv.INPAINT_TELEA)
+        return NotImplementedError
+        return cv2.inpaint(img, mask, 3, cv2.INPAINT_TELEA)
 
     def hdr(self, img):
         return img

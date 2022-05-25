@@ -33,8 +33,8 @@ class MainApplication(tk.Tk):
 
         self.title("Photo Editor")
 
-        window_width = 1200  # 800
-        window_height = 800  # 600
+        window_width = 1250
+        window_height = 800
 
         self.minsize(window_width, window_height)
 
