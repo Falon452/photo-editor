@@ -1,8 +1,8 @@
-
 from locale import currency
 from tkinter import EW, NE, NSEW, RIDGE, SE, ttk, ALL
 from tkinter import filedialog, Scale, HORIZONTAL
 from tkinter.colorchooser import askcolor
+from urllib.request import urlopen
 from PIL import Image, ImageTk, ImageEnhance
 from PIL import ImageFilter, ImageOps
 from PIL.ImageFilter import (
@@ -13,6 +13,7 @@ import tkinter as tk
 import cv2
 import sys
 import numpy as np
+import urllib.request
 
 class ImgUI:
     def __init__(self, parent):
@@ -23,20 +24,20 @@ class ImgUI:
         self.__stack_ix = -1
         self.do_capture = False  # ADDED
         self.scale = 1.0  # ADDED
-        self.width_shift_start = 0
-        self.width_shift_end = 0
-        self.height_shift_start = 0
-        self.height_shift_end = 0
-        self.width_move = 0 #vector of move in zoom
+        self.width_move = 0  # vector of move in zoom
+        self.height_move = 0  # vector of move in zoom
         self.new_value = 1
-
+        self.last_event_x = None
+        self.last_event_y = None
 
     def set_image(self, filepath):
         self.img = cv2.imread(filepath)
+        self.parent.image_frame.show_resolution= (650 * self.img.shape[1]// self.img.shape[0] ,650) 
+        
         self.img = cv2.cvtColor(self.img, cv2.COLOR_BGR2RGB)
         self.img = Image.fromarray(self.img)
         self.img = self.img.resize(self.parent.image_frame.show_resolution)
-       
+
         self.__add_to_stack()
         self.__update_enhancer()
         self.parent.image_frame.show_img(self.img)
@@ -52,6 +53,7 @@ class ImgUI:
                                               filetypes=(("PNG files", "*.png"), ("JPG files", "*.jpg"),
                                                          ("all files", "*.*")))
         if filepath:
+            self.__clear_stack()
             self.set_image(filepath)
 
     def change_img(self, res, brightness_effect=False, add_to_stack=True):
@@ -90,12 +92,14 @@ class ImgUI:
             self.__stack_ix = max(0, self.__stack_ix - 1)
             self.parent.image_frame.show_img(self.__stack[self.__stack_ix])
             self.img = self.__stack[self.__stack_ix]
+            self.__update_enhancer()
 
     def redo(self):
         if self.__stack:
             self.__stack_ix = min(len(self.__stack) - 1, self.__stack_ix + 1)
             self.parent.image_frame.show_img(self.__stack[self.__stack_ix])
             self.img = self.__stack[self.__stack_ix]
+            self.__update_enhancer()
 
     def change_color(self):
         colors = askcolor(title="Color Chooser")
@@ -197,70 +201,50 @@ class ImgUI:
         draw_color = colors[0]
         self.parent.image_frame.draw_bind()
 
-   
-
-
     def drawing_effect(self, event):
         if self.do_capture:
-            # tutaj chcielibyśmy mieć wycinek co jest na wyświetlany
-            effect_map = [-1 , 1,2, 3,6]
+            effect_map = [-1, 1, 2, 3, 6]
 
-            width_shift = self.width_shift_end - self.width_shift_start
-            height_shift = self.height_shift_end - self.height_shift_start
-            zoomed = np.asarray(self.img)[height_shift: 450 + height_shift][width_shift:600 + width_shift]
+            self.img = np.asarray(self.img)
 
-            # zoomed = np.asarray(self.img)[int(height_shift / self.new_value): int((450 + height_shift) / self.new_value)][int(width_shift / self.new_value):int((600 + width_shift) / self.new_value)]
+            x, y = int(event.x - self.width_move), int(event.y - self.height_move)
 
-            print(height_shift, 450 + height_shift, width_shift, 600 + width_shift)
             toggle = self.parent.effects_bar.draw_option.current()
             paint_size = 2 * self.parent.effects_bar.draw_size.current()
-            effect_idx =self.parent.effects_bar.effect_option.current()
+            effect_idx = self.parent.effects_bar.effect_option.current()
             width, height = self.parent.image_frame.show_resolution
 
             if paint_size < 0:
-                paint_size = 4  # default value
-      
-            if toggle == 0:  # print circles
-                cv2.circle(zoomed, (int(event.x) , int(event.y)),
-                        #    (int(event.x * (zoomed.shape[1] / width)), int(event.y * (zoomed.shape[0] / height))),
-                           int(paint_size * (zoomed.shape[0] / height)), draw_color, effect_map[effect_idx])
+                paint_size = 4
+
+            if toggle == 0:
+                cv2.circle(self.img, (x, y),
+                           int(paint_size * (self.img.shape[0] / height)), draw_color, effect_map[effect_idx])
             elif toggle == 1:
-                    cv2.rectangle(zoomed, (int(event.x ), int(event.y )), (
-                    int(event.x * (zoomed.shape[1] / width)) + int(paint_size * 2 * (zoomed.shape[0] / height)),
-                    int(event.y * (zoomed.shape[0] / height)) + int(paint_size * 2 * (zoomed.shape[0] / height))), draw_color,  effect_map[effect_idx])
-
-
-
-                # cv2.rectangle(zoomed, (int(event.x) , int(event.y)),(int(event.x * (zoomed.shape[1] / width)), int(event.y * (zoomed.shape[0] / height))),  int(paint_size * (zoomed.shape[0] / height)), draw_color, effect_map[effect_idx])
-                      #(int(event.x * (zoomed.shape[1] / width)), int(event.y * (zoomed.shape[0] / height))), (
+                cv2.rectangle(self.img, (x, y), (
+                    int(x * (self.img.shape[1] / width)) + int(paint_size * 2 * (self.img.shape[0] / height)),
+                    int(y * (self.img.shape[0] / height)) + int(paint_size * 2 * (self.img.shape[0] / height))),
+                              draw_color, effect_map[effect_idx])
             elif toggle == 2:
+                painting_size = int(paint_size) * 2
+                pts = np.array(
+                    [[x, y + painting_size * 0.66], [x - painting_size * 0.5, y - painting_size * 0.33],
+                     [x + painting_size * 0.5, y - painting_size * 0.33]], np.int32)
 
-                new_x = int(event.x) #, int(event.x * (zoomed.shape[1] / width))
-                new_y =  int(event.y) 
-                painting_size = int(paint_size ) *2
-                pts = np.array([[new_x , new_y +  painting_size* 0.66], [new_x - painting_size*0.5, new_y- painting_size* 0.33],
-                 [new_x + painting_size*0.5, new_y -painting_size* 0.33]] , np.int32)
-
-               
-                if effect_idx==0:
-                    cv2.fillPoly(zoomed,[pts],draw_color )
+                if effect_idx == 0:
+                    cv2.fillPoly(self.img, [pts], draw_color)
                 else:
-                    pts = pts.reshape((-1,1,2))
-                    cv2.polylines(zoomed,[pts],True,draw_color , 	thickness=effect_map[effect_idx])
+                    pts = pts.reshape((-1, 1, 2))
+                    cv2.polylines(self.img, [pts], True, draw_color, thickness=effect_map[effect_idx])
+
             res = np.asarray(self.img)
-            res[height_shift: 450 + height_shift][width_shift:600 + width_shift] = zoomed
             res = Image.fromarray(res)
-            self.width_shift_start = 0
-            self.height_shift_start = 0
-
             self.change_img(res)
-
 
     def do_zoom(self, new_value):
         self.new_value = self.parent.effects_bar.slider_zoom.get()
         size = self.parent.image_frame.show_resolution
         resize_image = self.img.resize((int(size[0] * self.new_value), int(size[1] * self.new_value)))
-        print(resize_image.size)
         self.img = resize_image
 
         if self.new_value == 1:  # not working - set in the middle of frame
@@ -275,40 +259,41 @@ class ImgUI:
         self.parent.image_frame.canvas.pack()
 
     def move_img(self, event):
-        if not self.width_shift_start:
-            self.width_shift_start = event.x
-            self.height_shift_start = event.y
-        self.width_shift_end = event.x
-        self.height_shift_end = event.y
-        self.width_move += (self.width_shift_end - self.width_shift_start)
-        self.width_shift_start = 0
-        self.height_shift_start = 0
-        print(event.x, event.y)
-        self.parent.image_frame.canvas.scan_dragto(event.x, event.y, gain=1)
+        if not self.last_event_x or abs(event.x - self.last_event_x) > 10:
+            self.last_event_x = event.x
+            self.last_event_y = event.y
+        else:
+            self.width_move += event.x - self.last_event_x
+            self.height_move += event.y - self.last_event_y
+            self.last_event_x = event.x
+            self.last_event_y = event.y
+            self.parent.image_frame.canvas.scan_dragto(event.x, event.y, gain=1)
 
     def scan_img(self, event):
         self.parent.image_frame.canvas.scan_mark(event.x, event.y)
 
     def text_effect(self):
         self.parent.image_frame.add_text_bind()
-        
-    def add_text(self ,event):
+
+    def add_text(self, event):
         self.new_value = self.parent.effects_bar.slider_zoom.get()
         size = self.parent.image_frame.show_resolution
         self.img = self.img.resize((int(size[0] * self.new_value), int(size[1] * self.new_value)))
-        
+
         paint_size = self.parent.effects_bar.draw_size.current()
-           
+
         if paint_size < 0:
             paint_size = 4  # default value
         text = self.parent.effects_bar.text_input.get()
         tmp_img = np.asarray(self.img)
-        image_with_text =cv2.putText(img=tmp_img, text=text, org=(event.x + self.width_move, event.y), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=paint_size, color=draw_color,thickness=paint_size)
+        image_with_text = cv2.putText(img=tmp_img, text=text, org=(event.x + self.width_move, event.y),
+                                      fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=paint_size, color=draw_color,
+                                      thickness=paint_size)
         res = Image.fromarray(image_with_text)
         self.change_img(res)
-      
+
     # END ADD
-    #opencv
+    # opencv
     def detect_face(self):
         res = self.parent.cv.detect_face(self.img)
         self.change_img(res)
@@ -320,7 +305,7 @@ class ImgUI:
     def detect_smile(self):
         res = self.parent.cv.detect_smile(self.img)
         self.change_img(res)
-    
+
     def detect_cars(self):
         res = self.parent.cv.detect_cars(self.img)
         self.change_img(res)
@@ -332,11 +317,26 @@ class ImgUI:
     def pattern_match(self):
         res = self.parent.cv.pattern_match(self.img)
         self.change_img(res)
-    #end opencv
+
+    def denoise(self):
+        res = self.parent.comp_photo.denoise(self.img)
+        self.change_img(res)
+
+    def inpaint(self):
+        res = self.parent.comp_photo.inpaint(self.img)
+        self.change_img(res)
+
+    def hdr(self):
+        res = self.parent.comp_photo.hdr(self.img)
+        self.change_img(res)
 
     def __update_enhancer(self):
         self.parent.effects_bar.slider.get()
         self.__enhancer = ImageEnhance.Brightness(self.img)
+
+    def __clear_stack(self):
+        self.__stack.clear()
+        self.__stack_ix = 0
 
     def __add_to_stack(self):
         if self.__stack_ix < len(self.__stack) - 1:
@@ -345,3 +345,23 @@ class ImgUI:
         self.__stack.append(self.img)
         self.__stack_ix += 1
 
+
+    def open_img_from_url(self):
+        url = self.parent.image_frame.entry1.get()
+        self.parent.image_frame.root.destroy()
+        resp = urllib.request.urlopen(url)
+        self.img = np.asarray(bytearray(resp.read()), dtype="uint8")
+        self.img = cv2.imdecode(self.img, cv2.COLOR_RGB2BGR)
+       
+        height, width = self.img.shape[0], self.img.shape[1]
+        self.img = cv2.cvtColor(self.img , cv2.COLOR_RGB2BGR)
+        self.img = Image.fromarray(self.img)
+        print(width, height)
+        self.parent.image_frame.show_resolution= (int(650 * width/height) ,650) 
+        print(self.parent.image_frame.show_resolution)
+        self.img = self.img.resize(self.parent.image_frame.show_resolution)
+        self.__add_to_stack()
+        self.__update_enhancer()
+        self.parent.image_frame.show_img(self.img)
+        
+      
