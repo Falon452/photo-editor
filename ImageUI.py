@@ -9,6 +9,7 @@ import cv2
 import numpy as np
 from PIL import Image, ImageTk, ImageEnhance
 from PIL import ImageOps
+from Stack import Stack
 
 
 class ImgUI:
@@ -16,10 +17,9 @@ class ImgUI:
         self.parent = parent
         self.img = None
         self.__enhancer = None
-        self.__stack = []
-        self.__stack_ix = -1
-        self.do_capture = False  # ADDED
-        self.scale = 1.0  # ADDED
+        self.stack = Stack()
+        self.do_capture = False
+        self.scale = 1.0
         self.width_move = 0  # vector of move in zoom
         self.height_move = 0  # vector of move in zoom
         self.new_value = 1
@@ -40,7 +40,7 @@ class ImgUI:
         self.img = Image.fromarray(self.img)
         self.img = self.img.resize(self.parent.image_frame.show_resolution)
 
-        self.__add_to_stack()
+        self.stack.add(self.img)
         self.__update_enhancer()
         self.parent.image_frame.show_img(self.img)
 
@@ -55,7 +55,7 @@ class ImgUI:
                                                filetypes=(("PNG files", "*.png"), ("JPG files", "*.jpg"),
                                                           ("all files", "*.*")))
         if file_path:
-            self.__clear_stack()
+            self.stack.clear()
             self.set_image(file_path)
 
     def change_img(self, res, brightness_effect=False, add_to_stack=True):
@@ -63,7 +63,7 @@ class ImgUI:
         if not brightness_effect:
             self.__update_enhancer()
         if add_to_stack:
-            self.__add_to_stack()
+            self.stack.add(self.img)
         self.parent.image_frame.show_img(self.img)
 
     def paint_effect(self):
@@ -90,17 +90,17 @@ class ImgUI:
         self.change_img(res, brightness_effect=True)
 
     def undo(self):
-        if self.__stack:
-            self.__stack_ix = max(0, self.__stack_ix - 1)
-            self.parent.image_frame.show_img(self.__stack[self.__stack_ix])
-            self.img = self.__stack[self.__stack_ix]
+        img = self.stack.undo()
+        if img:
+            self.img = img
+            self.parent.image_frame.show_img(img)
             self.__update_enhancer()
 
     def redo(self):
-        if self.__stack:
-            self.__stack_ix = min(len(self.__stack) - 1, self.__stack_ix + 1)
-            self.parent.image_frame.show_img(self.__stack[self.__stack_ix])
-            self.img = self.__stack[self.__stack_ix]
+        img = self.stack.redo()
+        if img:
+            self.img = img
+            self.parent.image_frame.show_img(img)
             self.__update_enhancer()
 
     def change_color(self):
@@ -329,16 +329,16 @@ class ImgUI:
         self.parent.effects_bar.slider.get()
         self.__enhancer = ImageEnhance.Brightness(self.img)
 
-    def __clear_stack(self):
-        self.__stack.clear()
-        self.__stack_ix = 0
-
-    def __add_to_stack(self):
-        if self.__stack_ix < len(self.__stack) - 1:
-            self.__stack = self.__stack[0:self.__stack_ix + 1]
-
-        self.__stack.append(self.img)
-        self.__stack_ix += 1
+    # def __clear_stack(self):
+    #     self.__stack.clear()
+    #     self.__stack_ix = 0
+    #
+    # def __add_to_stack(self):
+    #     if self.__stack_ix < len(self.__stack) - 1:
+    #         self.__stack = self.__stack[0:self.__stack_ix + 1]
+    #
+    #     self.__stack.append(self.img)
+    #     self.__stack_ix += 1
 
     def open_img_from_url(self):
         url = self.parent.image_frame.entry1.get()
@@ -354,6 +354,7 @@ class ImgUI:
         self.parent.image_frame.show_resolution = (int(650 * width / height), 650)
 
         self.img = self.img.resize(self.parent.image_frame.show_resolution)
-        self.__add_to_stack()
+        self.stack.add(self.img)
+        # self.__add_to_stack()
         self.__update_enhancer()
         self.parent.image_frame.show_img(self.img)

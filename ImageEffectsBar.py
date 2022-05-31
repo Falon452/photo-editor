@@ -1,4 +1,3 @@
-from tkinter import END, EW, NE, SE, ttk
 import tkinter as tk
 from tkinter import END, EW, NE, SE, ttk
 from tkinter import HORIZONTAL
