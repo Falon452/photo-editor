@@ -329,17 +329,6 @@ class ImgUI:
         self.parent.effects_bar.slider.get()
         self.__enhancer = ImageEnhance.Brightness(self.img)
 
-    # def __clear_stack(self):
-    #     self.__stack.clear()
-    #     self.__stack_ix = 0
-    #
-    # def __add_to_stack(self):
-    #     if self.__stack_ix < len(self.__stack) - 1:
-    #         self.__stack = self.__stack[0:self.__stack_ix + 1]
-    #
-    #     self.__stack.append(self.img)
-    #     self.__stack_ix += 1
-
     def open_img_from_url(self):
         url = self.parent.image_frame.entry1.get()
         self.parent.image_frame.root.destroy()
