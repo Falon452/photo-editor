@@ -1,31 +1,15 @@
-from locale import currency
-from tkinter import EW, NE, NSEW, RIDGE, SE, ttk, ALL
-from tkinter import filedialog, Scale, HORIZONTAL
-from tkinter.colorchooser import askcolor
-from PIL import Image, ImageTk, ImageEnhance
-from PIL import ImageFilter, ImageOps
-from PIL.ImageFilter import (
-    ModeFilter)
-from imutils.object_detection import non_max_suppression
-
-import tkinter as tk
-import cv2
 import sys
-import numpy as np
+import tkinter as tk
 
-from ImageUI import ImgUI
-from ObjectDetection import ObjectDetection
-from MenuBar import MenuBar
-from ImageFrame import ImageFrame
-from ImageEffectsBar import ImageEffectsBar
 from CompPhotography import ComputionalPhotography
+from ImageEffectsBar import ImageEffectsBar
+from ImageFrame import ImageFrame
+from ImageUI import ImgUI
+from MenuBar import MenuBar
+from ObjectDetection import ObjectDetection
 
-#theme
-import sv_ttk
-# pip install opencv-contrib-python
-# pip install imutils
-# pip install Pillow
 
+# import sv_ttk
 
 
 class MainApplication(tk.Tk):
@@ -34,9 +18,9 @@ class MainApplication(tk.Tk):
 
         self.title("Photo Editor")
 
-        if sys.platform != "darwin":
-            sv_ttk.set_theme("light") 
-            sv_ttk.use_light_theme()
+        # if sys.platform != "darwin":
+        #     sv_ttk.set_theme("light")
+        #     sv_ttk.use_light_theme()
 
         window_width = 1400
         window_height = 800
@@ -63,8 +47,6 @@ class MainApplication(tk.Tk):
         self.effects_bar.pack(side="left", fill="x")
 
         self._bindings()
-        #self.img_UI.open_img_from_url('https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Sunflower_from_Silesia2.jpg/1280px-Sunflower_from_Silesia2.jpg')
-        # self.__debugging()
 
     def _bindings(self):
         if sys.platform == "darwin":  # mac os
@@ -77,9 +59,6 @@ class MainApplication(tk.Tk):
             self.bind('<Control-Shift-Z>', lambda event: self.img_UI.redo())
             self.bind('<Control-o>', lambda event: self.img_UI.open_image())
             self.bind('<Control-s>', lambda event: self.img_UI.save_image())
-
-    # def __debugging(self):
-    #     self.img_UI.set_image(filepath=r'C:\somepics\blackwoman.jpg')
 
 
 if __name__ == '__main__':

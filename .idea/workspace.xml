@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="BRANCH:main" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </select>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="2485d8aa-8507-4c20-9311-a3e000876e9e" name="Default Changelist" comment="drawing">
+      <change beforePath="$PROJECT_DIR$/App.py" beforeDir="false" afterPath="$PROJECT_DIR$/App.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompPhotography.py" beforeDir="false" afterPath="$PROJECT_DIR$/CompPhotography.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ImageEffectsBar.py" beforeDir="false" afterPath="$PROJECT_DIR$/ImageEffectsBar.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ImageFrame.py" beforeDir="false" afterPath="$PROJECT_DIR$/ImageFrame.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ImageUI.py" beforeDir="false" afterPath="$PROJECT_DIR$/ImageUI.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MenuBar.py" beforeDir="false" afterPath="$PROJECT_DIR$/MenuBar.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ObjectDetection.py" beforeDir="false" afterPath="$PROJECT_DIR$/ObjectDetection.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="28OkWEUYh5nhC3PmYrHKETaIiPB" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="settings.editor.selected.configurable" value="configurable.group.build" />
+  </component>
+  <component name="RunManager" selected="Python.App">
+    <configuration name="App (1)" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="photo-editor" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/adabd/photo-editor" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/adabd/photo-editor/App.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="App" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="C:\Users\Damian\miniconda3\envs\photo-editor\python.exe" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/App.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="App" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="C:\Users\Damian\miniconda3\envs\photo-editor\python.exe" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/App.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.App" />
+        <item itemvalue="Python.App" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="2485d8aa-8507-4c20-9311-a3e000876e9e" name="Default Changelist" comment="" />
+      <created>1651095048592</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1651095048592</updated>
+    </task>
+    <task id="LOCAL-00001" summary="drawing">
+      <created>1651167555222</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1651167555222</updated>
+    </task>
+    <task id="LOCAL-00002" summary="drawing">
+      <created>1651167563801</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1651167563801</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="main" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="drawing" />
+    <option name="LAST_COMMIT_MESSAGE" value="drawing" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="669" y="97" key="#App" timestamp="1653426890601">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="669" y="97" key="#App/0.0.1920.1040@0.0.1920.1040" timestamp="1653426890601" />
+    <state x="154" y="197" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1653427001184">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="154" y="197" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1653427001184" />
+    <state x="479" y="297" key="FileChooserDialogImpl" timestamp="1653452855740">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="479" y="297" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1653452855740" />
+    <state width="1899" height="103" key="GridCell.Tab.0.bottom" timestamp="1654008038494">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1899" height="103" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1654008038494" />
+    <state width="1899" height="103" key="GridCell.Tab.0.center" timestamp="1654008038494">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1899" height="103" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1654008038494" />
+    <state width="1899" height="103" key="GridCell.Tab.0.left" timestamp="1654008038494">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1899" height="103" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1654008038494" />
+    <state width="1899" height="103" key="GridCell.Tab.0.right" timestamp="1654008038494">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1899" height="103" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1654008038494" />
+    <state width="1899" height="348" key="GridCell.Tab.1.bottom" timestamp="1653506228814">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1899" height="348" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1653506228814" />
+    <state width="1899" height="348" key="GridCell.Tab.1.center" timestamp="1653506228814">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1899" height="348" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1653506228814" />
+    <state width="1899" height="348" key="GridCell.Tab.1.left" timestamp="1653506228813">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1899" height="348" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1653506228813" />
+    <state width="1899" height="348" key="GridCell.Tab.1.right" timestamp="1653506228814">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1899" height="348" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1653506228814" />
+    <state x="201" y="187" key="SettingsEditor" timestamp="1653426919835">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="201" y="187" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1653426919835" />
+    <state x="363" y="266" width="672" height="678" key="search.everywhere.popup" timestamp="1653494273820">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="363" y="266" width="672" height="678" key="search.everywhere.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1653494273820" />
+  </component>
+</project>

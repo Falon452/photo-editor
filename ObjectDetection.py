@@ -1,17 +1,9 @@
-from locale import currency
-from tkinter import EW, NE, NSEW, RIDGE, SE, ttk, ALL
-from tkinter import filedialog, Scale, HORIZONTAL
-from tkinter.colorchooser import askcolor
-from PIL import Image, ImageTk, ImageEnhance
-from PIL import ImageFilter, ImageOps
-from PIL.ImageFilter import (
-    ModeFilter)
-from imutils.object_detection import non_max_suppression
+from tkinter import filedialog
 
-import tkinter as tk
 import cv2
-import sys
 import numpy as np
+from PIL import Image
+from imutils.object_detection import non_max_suppression
 
 
 class ObjectDetection:
@@ -64,7 +56,6 @@ class ObjectDetection:
         faces = self.face_cascade.detectMultiScale(img_gray, scaleFactor=1.05, minNeighbors=5)
 
         for (x, y, h, w) in faces:
-            center = (x + w // 2, y + h // 2)
             face = img[y: y + h, x: x + w, :]
             face_gray = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)
             face_gray = cv2.equalizeHist(face_gray)
@@ -78,7 +69,7 @@ class ObjectDetection:
         res = Image.fromarray(img)
         return res
 
-    def detect_fullbody(self, img):
+    def detect_full_body(self, img):
         img = np.array(img)
 
         hog = cv2.HOGDescriptor()
@@ -109,6 +100,7 @@ class ObjectDetection:
         if not self.cars_cascade.load(cv2.samples.findFile('haarcascades\haarcascade_cars.xml')):
             print('--(!)Error loading cars cascade')
             exit(0)
+
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         cars = self.cars_cascade.detectMultiScale(gray, 1.1, 1)
 

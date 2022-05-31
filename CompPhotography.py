@@ -2,6 +2,7 @@ import cv2
 from PIL import Image
 import numpy as np
 
+
 class ComputionalPhotography:
     def __init__(self, parent):
         self.parent = parent

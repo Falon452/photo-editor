@@ -1,18 +1,5 @@
-from locale import currency
-from tkinter import EW, NE, NSEW, RIDGE, SE, ttk, ALL
-from tkinter import filedialog, Scale, HORIZONTAL
-from tkinter.colorchooser import askcolor
-from PIL import Image, ImageTk, ImageEnhance
-from PIL import ImageFilter, ImageOps
-from PIL.ImageFilter import (
-    ModeFilter)
-from imutils.object_detection import non_max_suppression
-
 import tkinter as tk
-import cv2
-import sys
-import numpy as np
-
+from tkinter import ttk
 
 
 class MenuBar(ttk.Frame):
@@ -20,13 +7,13 @@ class MenuBar(ttk.Frame):
         super().__init__(parent)
         self.parent = parent
 
-        self.menubar = tk.Menu(parent, background='#ff8000', foreground='black', activebackground='white',
-                               activeforeground='black')
+        self.menu_bar = tk.Menu(parent, background='#ff8000', foreground='black', activebackground='white',
+                                activeforeground='black')
 
-        self.parent.config(menu=self.menubar)
+        self.parent.config(menu=self.menu_bar)
 
-        file_menu = tk.Menu(self.menubar, tearoff=False)
-        self.menubar.add_cascade(label="File", menu=file_menu)
+        file_menu = tk.Menu(self.menu_bar, tearoff=False)
+        self.menu_bar.add_cascade(label="File", menu=file_menu)
         file_menu.add_command(
             label='Open Image',
             command=self.parent.img_UI.open_image,
@@ -45,8 +32,8 @@ class MenuBar(ttk.Frame):
             command=self.parent.destroy,
         )
 
-        edit_menu = tk.Menu(self.menubar, tearoff=False)
-        self.menubar.add_cascade(label="Edit", menu=edit_menu)
+        edit_menu = tk.Menu(self.menu_bar, tearoff=False)
+        self.menu_bar.add_cascade(label="Edit", menu=edit_menu)
         edit_menu.add_command(
             label='Undo',
             command=self.parent.img_UI.undo

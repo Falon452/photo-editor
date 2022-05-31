@@ -1,19 +1,15 @@
-from locale import currency
-from tkinter import EW, NE, NSEW, RIDGE, SE, ttk, ALL
-from tkinter import filedialog, Scale, HORIZONTAL
+from tkinter import filedialog
+import tkinter as tk
+import urllib.request
+from tkinter import filedialog
 from tkinter.colorchooser import askcolor
 from urllib.request import urlopen
-from PIL import Image, ImageTk, ImageEnhance
-from PIL import ImageFilter, ImageOps
-from PIL.ImageFilter import (
-    ModeFilter)
-from imutils.object_detection import non_max_suppression
 
-import tkinter as tk
 import cv2
-import sys
 import numpy as np
-import urllib.request
+from PIL import Image, ImageTk, ImageEnhance
+from PIL import ImageOps
+
 
 class ImgUI:
     def __init__(self, parent):
@@ -29,11 +25,17 @@ class ImgUI:
         self.new_value = 1
         self.last_event_x = None
         self.last_event_y = None
+        self.crop_start_x = None
+        self.crop_start_y = None
+        self.crop_end_x = None
+        self.crop_end_y = None
+        self.rectangle_id = None
+        self.draw_color = None
 
-    def set_image(self, filepath):
-        self.img = cv2.imread(filepath)
-        self.parent.image_frame.show_resolution= (650 * self.img.shape[1]// self.img.shape[0] ,650) 
-        
+    def set_image(self, file_path):
+        self.img = cv2.imread(file_path)
+        self.parent.image_frame.show_resolution = (650 * self.img.shape[1] // self.img.shape[0], 650)
+
         self.img = cv2.cvtColor(self.img, cv2.COLOR_BGR2RGB)
         self.img = Image.fromarray(self.img)
         self.img = self.img.resize(self.parent.image_frame.show_resolution)
@@ -49,12 +51,12 @@ class ImgUI:
         self.img.save(filename)
 
     def open_image(self):
-        filepath = filedialog.askopenfilename(initialdir="/", title="Select A File",
-                                              filetypes=(("PNG files", "*.png"), ("JPG files", "*.jpg"),
-                                                         ("all files", "*.*")))
-        if filepath:
+        file_path = filedialog.askopenfilename(initialdir="/", title="Select A File",
+                                               filetypes=(("PNG files", "*.png"), ("JPG files", "*.jpg"),
+                                                          ("all files", "*.*")))
+        if file_path:
             self.__clear_stack()
-            self.set_image(filepath)
+            self.set_image(file_path)
 
     def change_img(self, res, brightness_effect=False, add_to_stack=True):
         self.img = res
@@ -133,7 +135,6 @@ class ImgUI:
         self.change_img(res)
 
     def start_crop(self, event):
-
         self.crop_start_x = event.x
         self.crop_start_y = event.y
         self.rectangle_id = None
@@ -149,7 +150,6 @@ class ImgUI:
             self.crop_start_x, self.crop_start_y, self.crop_end_x, self.crop_end_y, width=1)
 
     def end_crop(self, event):
-
         if self.crop_start_x <= self.crop_end_x and self.crop_start_y <= self.crop_end_y:
             start_x = self.crop_start_x
             start_y = self.crop_start_y
@@ -188,17 +188,14 @@ class ImgUI:
         res = np.array(self.img)[start_y: end_y, start_x: end_x]
         res = Image.fromarray(res)
         self.change_img(res)
-
         self.parent.image_frame.stop_cropping()
 
-    # ADD
     def capture(self, flag):
         self.do_capture = flag
 
     def draw(self):
         colors = askcolor(title="Color Chooser")
-        global draw_color
-        draw_color = colors[0]
+        self.draw_color = colors[0]
         self.parent.image_frame.draw_bind()
 
     def drawing_effect(self, event):
@@ -219,12 +216,12 @@ class ImgUI:
 
             if toggle == 0:
                 cv2.circle(self.img, (x, y),
-                           int(paint_size * (self.img.shape[0] / height)), draw_color, effect_map[effect_idx])
+                           int(paint_size * (self.img.shape[0] / height)), self.draw_color, effect_map[effect_idx])
             elif toggle == 1:
                 cv2.rectangle(self.img, (x, y), (
                     int(x * (self.img.shape[1] / width)) + int(paint_size * 2 * (self.img.shape[0] / height)),
                     int(y * (self.img.shape[0] / height)) + int(paint_size * 2 * (self.img.shape[0] / height))),
-                              draw_color, effect_map[effect_idx])
+                              self.draw_color, effect_map[effect_idx])
             elif toggle == 2:
                 painting_size = int(paint_size) * 2
                 pts = np.array(
@@ -232,10 +229,10 @@ class ImgUI:
                      [x + painting_size * 0.5, y - painting_size * 0.33]], np.int32)
 
                 if effect_idx == 0:
-                    cv2.fillPoly(self.img, [pts], draw_color)
+                    cv2.fillPoly(self.img, [pts], self.draw_color)
                 else:
                     pts = pts.reshape((-1, 1, 2))
-                    cv2.polylines(self.img, [pts], True, draw_color, thickness=effect_map[effect_idx])
+                    cv2.polylines(self.img, [pts], True, self.draw_color, thickness=effect_map[effect_idx])
 
             res = np.asarray(self.img)
             res = Image.fromarray(res)
@@ -287,19 +284,17 @@ class ImgUI:
         text = self.parent.effects_bar.text_input.get()
         tmp_img = np.asarray(self.img)
         image_with_text = cv2.putText(img=tmp_img, text=text, org=(event.x + self.width_move, event.y),
-                                      fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=paint_size, color=draw_color,
+                                      fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=paint_size, color=self.draw_color,
                                       thickness=paint_size)
         res = Image.fromarray(image_with_text)
         self.change_img(res)
 
-    # END ADD
-    # opencv
     def detect_face(self):
         res = self.parent.cv.detect_face(self.img)
         self.change_img(res)
 
-    def detect_fullbody(self):
-        res = self.parent.cv.detect_fullbody(self.img)
+    def detect_full_body(self):
+        res = self.parent.cv.detect_full_body(self.img)
         self.change_img(res)
 
     def detect_smile(self):
@@ -345,23 +340,20 @@ class ImgUI:
         self.__stack.append(self.img)
         self.__stack_ix += 1
 
-
     def open_img_from_url(self):
         url = self.parent.image_frame.entry1.get()
         self.parent.image_frame.root.destroy()
         resp = urllib.request.urlopen(url)
         self.img = np.asarray(bytearray(resp.read()), dtype="uint8")
         self.img = cv2.imdecode(self.img, cv2.COLOR_RGB2BGR)
-       
+
         height, width = self.img.shape[0], self.img.shape[1]
-        self.img = cv2.cvtColor(self.img , cv2.COLOR_RGB2BGR)
+        self.img = cv2.cvtColor(self.img, cv2.COLOR_RGB2BGR)
         self.img = Image.fromarray(self.img)
-        print(width, height)
-        self.parent.image_frame.show_resolution= (int(650 * width/height) ,650) 
-        print(self.parent.image_frame.show_resolution)
+
+        self.parent.image_frame.show_resolution = (int(650 * width / height), 650)
+
         self.img = self.img.resize(self.parent.image_frame.show_resolution)
         self.__add_to_stack()
         self.__update_enhancer()
         self.parent.image_frame.show_img(self.img)
-        
-      
