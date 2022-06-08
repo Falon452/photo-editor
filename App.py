@@ -9,18 +9,11 @@ from MenuBar import MenuBar
 from ObjectDetection import ObjectDetection
 
 
-# import sv_ttk
-
-
 class MainApplication(tk.Tk):
     def __init__(self):
         super().__init__()
 
         self.title("Photo Editor")
-
-        # if sys.platform != "darwin":
-        #     sv_ttk.set_theme("light")
-        #     sv_ttk.use_light_theme()
 
         window_width = 1400
         window_height = 800

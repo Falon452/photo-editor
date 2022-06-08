@@ -55,8 +55,6 @@ class ImageFrame(ttk.Frame):
 
     def open_image_url_window(self):
         self.root = tk.Tk()
-        sv_ttk.set_theme("light")
-        sv_ttk.use_light_theme()
 
         self.root.title('URL image')
         self.root.geometry("300x100")

@@ -317,14 +317,6 @@ class ImgUI:
         res = self.parent.comp_photo.denoise(self.img)
         self.change_img(res)
 
-    def inpaint(self):
-        res = self.parent.comp_photo.inpaint(self.img)
-        self.change_img(res)
-
-    def hdr(self):
-        res = self.parent.comp_photo.hdr(self.img)
-        self.change_img(res)
-
     def __update_enhancer(self):
         self.parent.effects_bar.slider.get()
         self.__enhancer = ImageEnhance.Brightness(self.img)

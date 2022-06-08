@@ -161,14 +161,7 @@ class ImageEffectsBar(ttk.Frame):
 
     def add_computional_photograpy(self):
         button = ttk.Button(self, text='Denoise', command=self.parent.img_UI.denoise, width=self.button_width // 2)
-        button.grid(row=0, column=self.curr_column)
-
-        button = ttk.Button(self, text='Inpaint', command=self.parent.img_UI.inpaint,
-                            width=self.button_width // 2)
         button.grid(row=1, column=self.curr_column)
-
-        button = ttk.Button(self, text='HDR', command=self.parent.img_UI.hdr, width=self.button_width // 2)
-        button.grid(row=3, column=self.curr_column)
 
         self.curr_column += 1
 
