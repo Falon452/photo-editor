@@ -322,7 +322,7 @@ class ImgUI:
         self.__enhancer = ImageEnhance.Brightness(self.img)
 
     def open_img_from_url(self):
-        url = self.parent.image_frame.entry1.get()
+        url = self.parent.image_frame.img_url_entry.get()
         self.parent.image_frame.root.destroy()
         resp = urllib.request.urlopen(url)
         self.img = np.asarray(bytearray(resp.read()), dtype="uint8")

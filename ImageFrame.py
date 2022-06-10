@@ -13,6 +13,7 @@ class ImageFrame(ttk.Frame):
         self.show_resolution = (600, 450)
         self.shown_image = None
         self.canvas = tk.Canvas(self, bg="gray", width=self.show_resolution[0], height=self.show_resolution[1])
+        self.img_url_entry = None
 
     def show_img(self, res):
         self.canvas.delete("all")
@@ -60,8 +61,8 @@ class ImageFrame(ttk.Frame):
         self.root.geometry("300x100")
         label = tk.Label(self.root, text='Entry URL address:', pady=10)
         label.pack()
-        entry1 = tk.Entry(self.root, width=100)
-        entry1.pack()
+        self.img_url_entry = tk.Entry(self.root, width=100)
+        self.img_url_entry.pack()
         button1 = tk.Button(self.root, text='Ok', command=self.parent.img_UI.open_img_from_url)
         button1.pack(side=tk.RIGHT, padx=10, pady=5)
         self.root.mainloop()
